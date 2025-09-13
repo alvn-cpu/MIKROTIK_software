@@ -1,4 +1,5 @@
-const radius = require('node-radius-client');
+const radius = require('radius');
+const dgram = require('dgram');
 const logger = require('../utils/logger');
 
 class RadiusClient {
@@ -12,8 +13,55 @@ class RadiusClient {
       retries: 3
     };
     
-    this.client = new radius.RadiusClient(this.config);
+    // No need to create persistent clients, we'll create them per request
     logger.radius('RADIUS client initialized', this.config);
+  }
+
+  /**
+   * Send RADIUS packet
+   * @param {Object} packet 
+   * @param {number} port 
+   * @returns {Promise<Object>}
+   */
+  sendPacket(packet, port) {
+    return new Promise((resolve, reject) => {
+      const client = dgram.createSocket('udp4');
+      const encodedPacket = radius.encode(packet);
+      
+      const timeout = setTimeout(() => {
+        client.close();
+        reject(new Error('RADIUS request timeout'));
+      }, this.config.timeout);
+
+      client.send(encodedPacket, 0, encodedPacket.length, port, this.config.host, (err) => {
+        if (err) {
+          clearTimeout(timeout);
+          client.close();
+          reject(err);
+          return;
+        }
+      });
+
+      client.on('message', (msg) => {
+        clearTimeout(timeout);
+        client.close();
+        try {
+          const response = radius.decode({
+            packet: msg,
+            secret: this.config.secret
+          });
+          resolve(response);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      client.on('error', (err) => {
+        clearTimeout(timeout);
+        client.close();
+        reject(err);
+      });
+    });
   }
 
   /**
@@ -27,26 +75,24 @@ class RadiusClient {
     try {
       logger.radius(`Authenticating user: ${username}`);
       
-      const packet = {
+      const response = await this.sendPacket({
         code: 'Access-Request',
         secret: this.config.secret,
-        attributes: [
-          ['User-Name', username],
-          ['User-Password', password],
-          ['NAS-IP-Address', nasIpAddress],
-          ['Service-Type', 'Framed-User'],
-          ['Framed-Protocol', 'PPP']
-        ]
-      };
-
-      const response = await this.client.accessRequest(packet);
+        attributes: {
+          'User-Name': username,
+          'User-Password': password,
+          'NAS-IP-Address': nasIpAddress,
+          'Service-Type': 'Framed-User',
+          'Framed-Protocol': 'PPP'
+        }
+      }, this.config.port);
       
       if (response.code === 'Access-Accept') {
         logger.radius(`Authentication successful for user: ${username}`);
         return {
           success: true,
           code: response.code,
-          attributes: this.parseAttributes(response.attributes)
+          attributes: response.attributes || {}
         };
       } else {
         logger.radius(`Authentication failed for user: ${username}, code: ${response.code}`);
@@ -76,24 +122,24 @@ class RadiusClient {
       
       logger.radius(`Sending accounting start for session: ${sessionId}`);
       
-      const packet = {
-        code: 'Accounting-Request',
-        secret: this.config.secret,
-        attributes: [
-          ['User-Name', username],
-          ['Acct-Status-Type', 'Start'],
-          ['Acct-Session-Id', sessionId],
-          ['NAS-IP-Address', nasIpAddress || '127.0.0.1'],
-          ['Service-Type', 'Framed-User'],
-          ['Framed-Protocol', 'PPP']
-        ]
+      const attributes = {
+        'User-Name': username,
+        'Acct-Status-Type': 'Start',
+        'Acct-Session-Id': sessionId,
+        'NAS-IP-Address': nasIpAddress || '127.0.0.1',
+        'Service-Type': 'Framed-User',
+        'Framed-Protocol': 'PPP'
       };
 
       if (framedIpAddress) {
-        packet.attributes.push(['Framed-IP-Address', framedIpAddress]);
+        attributes['Framed-IP-Address'] = framedIpAddress;
       }
 
-      const response = await this.client.accountingRequest(packet);
+      const response = await this.sendPacket({
+        code: 'Accounting-Request',
+        secret: this.config.secret,
+        attributes: attributes
+      }, this.config.accountingPort);
       
       return {
         success: response.code === 'Accounting-Response',
@@ -128,28 +174,28 @@ class RadiusClient {
       
       logger.radius(`Sending accounting stop for session: ${sessionId}`);
       
-      const packet = {
-        code: 'Accounting-Request',
-        secret: this.config.secret,
-        attributes: [
-          ['User-Name', username],
-          ['Acct-Status-Type', 'Stop'],
-          ['Acct-Session-Id', sessionId],
-          ['NAS-IP-Address', nasIpAddress || '127.0.0.1'],
-          ['Service-Type', 'Framed-User'],
-          ['Framed-Protocol', 'PPP'],
-          ['Acct-Session-Time', sessionTime || 0],
-          ['Acct-Input-Octets', inputOctets || 0],
-          ['Acct-Output-Octets', outputOctets || 0],
-          ['Acct-Terminate-Cause', terminateCause || 'User-Request']
-        ]
+      const attributes = {
+        'User-Name': username,
+        'Acct-Status-Type': 'Stop',
+        'Acct-Session-Id': sessionId,
+        'NAS-IP-Address': nasIpAddress || '127.0.0.1',
+        'Service-Type': 'Framed-User',
+        'Framed-Protocol': 'PPP',
+        'Acct-Session-Time': sessionTime || 0,
+        'Acct-Input-Octets': inputOctets || 0,
+        'Acct-Output-Octets': outputOctets || 0,
+        'Acct-Terminate-Cause': terminateCause || 'User-Request'
       };
 
       if (framedIpAddress) {
-        packet.attributes.push(['Framed-IP-Address', framedIpAddress]);
+        attributes['Framed-IP-Address'] = framedIpAddress;
       }
 
-      const response = await this.client.accountingRequest(packet);
+      const response = await this.sendPacket({
+        code: 'Accounting-Request',
+        secret: this.config.secret,
+        attributes: attributes
+      }, this.config.accountingPort);
       
       return {
         success: response.code === 'Accounting-Response',
@@ -183,27 +229,27 @@ class RadiusClient {
       
       logger.radius(`Sending accounting update for session: ${sessionId}`);
       
-      const packet = {
-        code: 'Accounting-Request',
-        secret: this.config.secret,
-        attributes: [
-          ['User-Name', username],
-          ['Acct-Status-Type', 'Interim-Update'],
-          ['Acct-Session-Id', sessionId],
-          ['NAS-IP-Address', nasIpAddress || '127.0.0.1'],
-          ['Service-Type', 'Framed-User'],
-          ['Framed-Protocol', 'PPP'],
-          ['Acct-Session-Time', sessionTime || 0],
-          ['Acct-Input-Octets', inputOctets || 0],
-          ['Acct-Output-Octets', outputOctets || 0]
-        ]
+      const attributes = {
+        'User-Name': username,
+        'Acct-Status-Type': 'Interim-Update',
+        'Acct-Session-Id': sessionId,
+        'NAS-IP-Address': nasIpAddress || '127.0.0.1',
+        'Service-Type': 'Framed-User',
+        'Framed-Protocol': 'PPP',
+        'Acct-Session-Time': sessionTime || 0,
+        'Acct-Input-Octets': inputOctets || 0,
+        'Acct-Output-Octets': outputOctets || 0
       };
 
       if (framedIpAddress) {
-        packet.attributes.push(['Framed-IP-Address', framedIpAddress]);
+        attributes['Framed-IP-Address'] = framedIpAddress;
       }
 
-      const response = await this.client.accountingRequest(packet);
+      const response = await this.sendPacket({
+        code: 'Accounting-Request',
+        secret: this.config.secret,
+        attributes: attributes
+      }, this.config.accountingPort);
       
       return {
         success: response.code === 'Accounting-Response',
@@ -218,22 +264,6 @@ class RadiusClient {
     }
   }
 
-  /**
-   * Parse RADIUS attributes into key-value pairs
-   * @param {Array} attributes 
-   * @returns {Object}
-   */
-  parseAttributes(attributes) {
-    const parsed = {};
-    if (attributes) {
-      attributes.forEach(attr => {
-        if (Array.isArray(attr) && attr.length >= 2) {
-          parsed[attr[0]] = attr[1];
-        }
-      });
-    }
-    return parsed;
-  }
 
   /**
    * Test RADIUS server connectivity
