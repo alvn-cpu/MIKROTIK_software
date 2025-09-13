@@ -1,37 +1,33 @@
-const { RouterOSAPI } = require('node-routeros');
+const MikroNode = require('mikronode-ng');
 const logger = require('../utils/logger');
 
 class MikrotikService {
   constructor() {}
 
   async connect({ host, username, password, port = 8728 }) {
-    try {
-      const conn = new RouterOSAPI({
-        host: host,
-        user: username,
-        password: password,
+    return new Promise((resolve, reject) => {
+      const connection = new MikroNode(host, username, password, {
         port: port,
         timeout: 5
       });
       
-      await conn.connect();
-      return conn;
-    } catch (error) {
-      throw new Error(`Failed to connect to MikroTik: ${error.message}`);
-    }
+      connection.connect((conn) => {
+        resolve(conn);
+      }, (error) => {
+        reject(new Error(`Failed to connect to MikroTik: ${error}`));
+      });
+    });
   }
 
   async executeCommand(conn, command, args = {}) {
-    try {
-      const params = [command];
-      if (Object.keys(args).length > 0) {
-        params.push(args);
-      }
-      const result = await conn.write(...params);
-      return result;
-    } catch (error) {
-      throw new Error(`Command failed: ${error.message}`);
-    }
+    return new Promise((resolve, reject) => {
+      const channel = conn.openChannel();
+      channel.write(command, args, (parsed) => {
+        resolve(parsed.data || []);
+      }, (error) => {
+        reject(new Error(`Command failed: ${error}`));
+      });
+    });
   }
 
   async listHotspotActive({ host, username, password, port }) {
@@ -39,7 +35,7 @@ class MikrotikService {
     try {
       return await this.executeCommand(conn, '/ip/hotspot/active/print');
     } finally { 
-      await conn.close(); 
+      conn.close(); 
     }
   }
 
@@ -54,7 +50,7 @@ class MikrotikService {
       }
       return { success: false, error: 'user not found active' };
     } finally { 
-      await conn.close(); 
+      conn.close(); 
     }
   }
 
@@ -63,7 +59,7 @@ class MikrotikService {
     try {
       return await this.executeCommand(conn, '/queue/simple/print');
     } finally { 
-      await conn.close(); 
+      conn.close(); 
     }
   }
 
@@ -89,7 +85,7 @@ class MikrotikService {
       logger.error('Failed to send user notification:', error);
       return { success: false, error: error.message };
     } finally { 
-      await conn.close(); 
+      conn.close(); 
     }
   }
 
@@ -123,7 +119,7 @@ class MikrotikService {
       logger.error('Failed to send hotspot notification:', error);
       return { success: false, error: error.message };
     } finally { 
-      await conn.close(); 
+      conn.close(); 
     }
   }
 
@@ -167,7 +163,7 @@ class MikrotikService {
       logger.error('Failed to get user session info:', error);
       return { success: false, error: error.message };
     } finally { 
-      await conn.close(); 
+      conn.close(); 
     }
   }
 
@@ -204,7 +200,7 @@ class MikrotikService {
       logger.error('Failed to broadcast notification:', error);
       return { success: false, error: error.message };
     } finally { 
-      await conn.close(); 
+      conn.close(); 
     }
   }
 }
