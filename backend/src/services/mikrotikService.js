@@ -5,42 +5,66 @@ class MikrotikService {
   constructor() {}
 
   async connect({ host, username, password, port = 8728 }) {
-    const api = new RouterOSAPI({
-      host: host,
-      user: username,
-      password: password,
-      port: port
-    });
-    await api.connect();
-    return api;
+    try {
+      const conn = new RouterOSAPI({
+        host: host,
+        user: username,
+        password: password,
+        port: port,
+        timeout: 5
+      });
+      
+      await conn.connect();
+      return conn;
+    } catch (error) {
+      throw new Error(`Failed to connect to MikroTik: ${error.message}`);
+    }
+  }
+
+  async executeCommand(conn, command, args = {}) {
+    try {
+      const params = [command];
+      if (Object.keys(args).length > 0) {
+        params.push(args);
+      }
+      const result = await conn.write(...params);
+      return result;
+    } catch (error) {
+      throw new Error(`Command failed: ${error.message}`);
+    }
   }
 
   async listHotspotActive({ host, username, password, port }) {
-    const api = await this.connect({ host, username, password, port });
+    const conn = await this.connect({ host, username, password, port });
     try {
-      const res = await api.write('/ip/hotspot/active/print');
-      return res;
-    } finally { await api.close(); }
+      return await this.executeCommand(conn, '/ip/hotspot/active/print');
+    } finally { 
+      await conn.close(); 
+    }
   }
 
   async disconnectHotspotUser({ host, username, password, port, user }) {
-    const api = await this.connect({ host, username, password, port });
+    const conn = await this.connect({ host, username, password, port });
     try {
-      const actives = await api.write('/ip/hotspot/active/print');
+      const actives = await this.executeCommand(conn, '/ip/hotspot/active/print');
       const entry = actives.find((a) => a.user === user || a['user'] === user);
       if (entry && entry['.id']) {
-        await api.write('/ip/hotspot/active/remove', { ".id": entry['.id'] });
+        await this.executeCommand(conn, '/ip/hotspot/active/remove', { ".id": entry['.id'] });
         return { success: true };
       }
       return { success: false, error: 'user not found active' };
-    } finally { await api.close(); }
+    } finally { 
+      await conn.close(); 
+    }
   }
 
   async listQueues({ host, username, password, port }) {
-    const api = await this.connect({ host, username, password, port });
+    const conn = await this.connect({ host, username, password, port });
     try {
-      return await api.write('/queue/simple/print');
-    } finally { await api.close(); }
+      return await this.executeCommand(conn, '/queue/simple/print');
+    } finally { 
+      await conn.close(); 
+    }
   }
 
   /**
@@ -51,10 +75,10 @@ class MikrotikService {
    * @returns {Promise<Object>}
    */
   async sendUserNotification({ host, username, password, port, user, message }) {
-    const api = await this.connect({ host, username, password, port });
+    const conn = await this.connect({ host, username, password, port });
     try {
-      // Send popup message via hotspot
-      const result = await api.write('/tool/user-manager/user/send-message', {
+      // Send popup message via user manager
+      const result = await this.executeCommand(conn, '/tool/user-manager/user/send-message', {
         'user': user,
         'message': message
       });
@@ -65,7 +89,7 @@ class MikrotikService {
       logger.error('Failed to send user notification:', error);
       return { success: false, error: error.message };
     } finally { 
-      await api.close(); 
+      await conn.close(); 
     }
   }
 
@@ -77,10 +101,10 @@ class MikrotikService {
    * @returns {Promise<Object>}
    */
   async sendHotspotNotification({ host, username, password, port, user, message }) {
-    const api = await this.connect({ host, username, password, port });
+    const conn = await this.connect({ host, username, password, port });
     try {
       // Find active session for user
-      const actives = await api.write('/ip/hotspot/active/print');
+      const actives = await this.executeCommand(conn, '/ip/hotspot/active/print');
       const session = actives.find(s => s.user === user);
       
       if (!session) {
@@ -88,7 +112,7 @@ class MikrotikService {
       }
 
       // Send message to active session
-      await api.write('/ip/hotspot/active/send-message', {
+      await this.executeCommand(conn, '/ip/hotspot/active/send-message', {
         'numbers': session['.id'],
         'message': message
       });
@@ -99,7 +123,7 @@ class MikrotikService {
       logger.error('Failed to send hotspot notification:', error);
       return { success: false, error: error.message };
     } finally { 
-      await api.close(); 
+      await conn.close(); 
     }
   }
 
@@ -110,10 +134,10 @@ class MikrotikService {
    * @returns {Promise<Object>}
    */
   async getUserSessionInfo({ host, username, password, port, user }) {
-    const api = await this.connect({ host, username, password, port });
+    const conn = await this.connect({ host, username, password, port });
     try {
       // Get active hotspot sessions
-      const actives = await api.write('/ip/hotspot/active/print');
+      const actives = await this.executeCommand(conn, '/ip/hotspot/active/print');
       const session = actives.find(s => s.user === user);
       
       if (!session) {
@@ -121,7 +145,7 @@ class MikrotikService {
       }
 
       // Get user profile information for time limits
-      const users = await api.write('/ip/hotspot/user/print', {
+      const users = await this.executeCommand(conn, '/ip/hotspot/user/print', {
         '?name': user
       });
       const userProfile = users[0];
@@ -143,7 +167,7 @@ class MikrotikService {
       logger.error('Failed to get user session info:', error);
       return { success: false, error: error.message };
     } finally { 
-      await api.close(); 
+      await conn.close(); 
     }
   }
 
@@ -154,9 +178,9 @@ class MikrotikService {
    * @returns {Promise<Object>}
    */
   async broadcastNotification({ host, username, password, port, message }) {
-    const api = await this.connect({ host, username, password, port });
+    const conn = await this.connect({ host, username, password, port });
     try {
-      const actives = await api.write('/ip/hotspot/active/print');
+      const actives = await this.executeCommand(conn, '/ip/hotspot/active/print');
       
       if (actives.length === 0) {
         return { success: true, message: 'No active users to notify' };
@@ -165,7 +189,7 @@ class MikrotikService {
       // Send to all active sessions
       for (const session of actives) {
         try {
-          await api.write('/ip/hotspot/active/send-message', {
+          await this.executeCommand(conn, '/ip/hotspot/active/send-message', {
             'numbers': session['.id'],
             'message': message
           });
@@ -180,7 +204,7 @@ class MikrotikService {
       logger.error('Failed to broadcast notification:', error);
       return { success: false, error: error.message };
     } finally { 
-      await api.close(); 
+      await conn.close(); 
     }
   }
 }
