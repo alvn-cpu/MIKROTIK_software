@@ -1,0 +1,14 @@
+# Example REST module configuration
+# Point to your backend API endpoints
+
+rest rest_auth {
+    uri = "https://your-backend.example.com/api/radius/auth"
+    method = "post"
+    body = json
+}
+
+rest rest_acct {
+    uri = "https://your-backend.example.com/api/radius/accounting"
+    method = "post"
+    body = json
+}

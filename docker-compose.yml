@@ -1,0 +1,40 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: wifi_billing
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+  backend:
+    build:
+      context: .
+      target: backend
+    env_file: ./.env
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: wifi_billing
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+      - redis
+  freeradius:
+    image: freeradius/freeradius-server:latest
+    # Mount your configs if needed
+    # volumes:
+    #   - ./docs/radius/clients.conf.example:/etc/freeradius/3.0/clients.conf:ro
+volumes:
+  db_data: {}

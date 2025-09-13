@@ -1,0 +1,7 @@
+# Example NAS client definition for MikroTik
+client mikrotik_station {
+    ipaddr = 192.168.88.1
+    secret = your-radius-secret
+    shortname = hotspot1
+    nastype = other
+}

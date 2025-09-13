@@ -1,0 +1,14 @@
+# Example: sites-enabled/default (REST)
+# Include these stanzas under appropriate sections.
+
+authorize {
+    rest
+}
+
+accounting {
+    rest
+}
+
+post-auth {
+    rest
+}

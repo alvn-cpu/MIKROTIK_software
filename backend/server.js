@@ -18,7 +18,9 @@ const planRoutes = require('./src/routes/plans');
 const paymentRoutes = require('./src/routes/payments');
 const radiusRoutes = require('./src/routes/radius');
 const mikrotikRoutes = require('./src/routes/mikrotik');
+const mikrotikConfigRoutes = require('./src/routes/mikrotik-config');
 const adminRoutes = require('./src/routes/admin');
+const portalRoutes = require('./src/routes/portal');
 
 const app = express();
 const server = createServer(app);
@@ -72,7 +74,9 @@ app.use('/api/plans', planRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/radius', radiusRoutes);
 app.use('/api/mikrotik', mikrotikRoutes);
+app.use('/api/mikrotik', mikrotikConfigRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/portal', portalRoutes);
 
 // Socket.IO for real-time features
 io.on('connection', (socket) => {

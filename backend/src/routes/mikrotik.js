@@ -1,30 +1,25 @@
 const express = require('express');
 const router = express.Router();
+const mikrotik = require('../services/mikrotikService');
+const { authMiddleware, requireAdmin } = require('../services/authService');
+const { requireTrustedStation } = require('../middleware/nasTrust');
 
-// Placeholder routes for MikroTik integration
-
-router.get('/users', (req, res) => {
-  res.json({ message: 'Get MikroTik users endpoint - to be implemented' });
+// Get active hotspot users
+router.get('/active-users', authMiddleware, requireAdmin, async (req, res, next) => {
+  try {
+    const { host, username, password, port } = req.query; // in production: fetch from stations table
+    const list = await mikrotik.listHotspotActive({ host, username, password, port: Number(port) || 8728 });
+    res.json({ active: list });
+  } catch (e) { next(e); }
 });
 
-router.post('/users', (req, res) => {
-  res.json({ message: 'Create MikroTik user endpoint - to be implemented' });
-});
-
-router.put('/users/:username', (req, res) => {
-  res.json({ message: 'Update MikroTik user endpoint - to be implemented' });
-});
-
-router.delete('/users/:username', (req, res) => {
-  res.json({ message: 'Delete MikroTik user endpoint - to be implemented' });
-});
-
-router.get('/active-users', (req, res) => {
-  res.json({ message: 'Get active MikroTik users endpoint - to be implemented' });
-});
-
-router.post('/disconnect/:username', (req, res) => {
-  res.json({ message: 'Disconnect MikroTik user endpoint - to be implemented' });
+// Disconnect a hotspot user
+router.post('/disconnect/:username', authMiddleware, requireAdmin, async (req, res, next) => {
+  try {
+    const { host, username: apiUser, password, port } = req.body;
+    const out = await mikrotik.disconnectHotspotUser({ host, username: apiUser, password, port, user: req.params.username });
+    res.json(out);
+  } catch (e) { next(e); }
 });
 
 module.exports = router;

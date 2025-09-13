@@ -38,7 +38,7 @@
     "socket.io": "^4.7.2",
     "cron": "^2.4.1",
     "node-radius-client": "^1.0.0",
-    "mikrotik-client": "^2.4.0",
+    "node-routeros": "^1.8.0",
     "express-validator": "^7.0.1"
   },
   "devDependencies": {

@@ -118,6 +118,15 @@ const AdminDashboard = () => {
     { key: 'plans', icon: <ReceiptIcon />, text: 'Billing Plans' },
     { key: 'transactions', icon: <PaymentIcon />, text: 'Transactions' },
     { key: 'routers', icon: <RouterIcon />, text: 'MikroTik Routers' },
+    { key: 'firewall', icon: <SettingsIcon />, text: 'Firewall & NAT' },
+    { key: 'dhcp', icon: <SettingsIcon />, text: 'DHCP & Leases' },
+    { key: 'queues', icon: <NetworkIcon />, text: 'Queues & Bandwidth' },
+    { key: 'pppoe', icon: <SettingsIcon />, text: 'PPPoE & Secrets' },
+    { key: 'scheduler', icon: <ScheduleIcon />, text: 'Scheduler & Tasks' },
+    { key: 'backups', icon: <DownloadIcon />, text: 'Backups & Restore' },
+    { key: 'logs', icon: <ReportIcon />, text: 'System Logs' },
+    { key: 'interfaces', icon: <NetworkIcon />, text: 'Interfaces & Traffic' },
+    { key: 'firmware', icon: <WarningIcon />, text: 'Firmware & Reboot' },
     { key: 'reports', icon: <ReportIcon />, text: 'Reports & Analytics' },
     { key: 'monitoring', icon: <NetworkIcon />, text: 'Network Monitoring' },
     { key: 'settings', icon: <SettingsIcon />, text: 'System Settings' }
@@ -564,6 +573,360 @@ const AdminDashboard = () => {
     </Box>
   );
 
+  // Additional MikroTik admin panels (placeholders with interactive controls)
+  const renderFirewall = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>Firewall & NAT</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h6">Filter Rules</Typography>
+                <Button variant="contained" size="small">Add Rule</Button>
+              </Box>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Chain</TableCell>
+                      <TableCell>Src/Dst</TableCell>
+                      <TableCell>Action</TableCell>
+                      <TableCell align="right">Enable</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>forward</TableCell>
+                      <TableCell>any → any</TableCell>
+                      <TableCell>accept</TableCell>
+                      <TableCell align="right"><Chip size="small" color="success" label="on" /></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h6">NAT Rules</Typography>
+                <Button variant="contained" size="small">Add NAT</Button>
+              </Box>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Chain</TableCell>
+                      <TableCell>To Address</TableCell>
+                      <TableCell>Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>srcnat</TableCell>
+                      <TableCell>masquerade</TableCell>
+                      <TableCell><Chip size="small" label="enabled" /></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const renderDhcp = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>DHCP & Leases</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Active Leases</Typography>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>IP</TableCell>
+                      <TableCell>MAC</TableCell>
+                      <TableCell>Hostname</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>192.168.88.10</TableCell>
+                      <TableCell>AA:BB:CC:DD:EE:FF</TableCell>
+                      <TableCell>client-10</TableCell>
+                      <TableCell><Chip size="small" color="success" label="bound" /></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Address Pools</Typography>
+              <Button variant="outlined" size="small" sx={{ mb: 2 }}>Add Pool</Button>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Range</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>hs-pool-1</TableCell>
+                      <TableCell>192.168.88.10-192.168.88.254</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const renderQueues = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>Queues & Bandwidth</Typography>
+      <Card>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Simple Queues</Typography>
+            <Button variant="contained" size="small">Create Queue</Button>
+          </Box>
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Target</TableCell>
+                  <TableCell>Max Limit</TableCell>
+                  <TableCell>Priority</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>192.168.88.0/24</TableCell>
+                  <TableCell>20M/20M</TableCell>
+                  <TableCell>8</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+
+  const renderPPPoE = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>PPPoE & Secrets</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Active PPPoE Sessions</Typography>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>User</TableCell>
+                      <TableCell>IP</TableCell>
+                      <TableCell>Uptime</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>user1</TableCell>
+                      <TableCell>10.0.0.10</TableCell>
+                      <TableCell>01:23:45</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Secrets</Typography>
+              <Button variant="outlined" size="small" sx={{ mb: 2 }}>Add Secret</Button>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>User</TableCell>
+                      <TableCell>Service</TableCell>
+                      <TableCell>Profile</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>user1</TableCell>
+                      <TableCell>pppoe</TableCell>
+                      <TableCell>default</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const renderScheduler = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>Scheduler & Tasks</Typography>
+      <Card>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Scheduled Jobs</Typography>
+            <Button variant="contained" size="small">Add Job</Button>
+          </Box>
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Interval</TableCell>
+                  <TableCell>Next Run</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>backup-nightly</TableCell>
+                  <TableCell>1d</TableCell>
+                  <TableCell>02:00</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+
+  const renderBackups = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>Backups & Restore</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Create Backup</Typography>
+              <Button variant="contained" sx={{ mr: 1 }}>Download .backup</Button>
+              <Button variant="outlined">Export .rsc</Button>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Restore</Typography>
+              <Button variant="outlined">Upload & Restore</Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const renderLogs = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>System Logs</Typography>
+      <Card>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Recent Events</Typography>
+            <Button variant="outlined" size="small">Refresh</Button>
+          </Box>
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Time</TableCell>
+                  <TableCell>Topic</TableCell>
+                  <TableCell>Message</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>10:22:11</TableCell>
+                  <TableCell>system,info</TableCell>
+                  <TableCell>router rebooted</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+
+  const renderInterfaces = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>Interfaces & Traffic</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Interfaces</Typography>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>RX/TX</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>ether1</TableCell>
+                      <TableCell>ethernet</TableCell>
+                      <TableCell>120 Mbps / 85 Mbps</TableCell>
+                      <TableCell><Chip size="small" color="success" label="running" /></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const renderFirmware = () => (
+    <Box>
+      <Typography variant="h4" gutterBottom>Firmware & Reboot</Typography>
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>System Control</Typography>
+          <Button variant="contained" color="warning" sx={{ mr: 2 }}>Check for Updates</Button>
+          <Button variant="outlined" color="error">Reboot Router</Button>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+
   const renderContent = () => {
     switch (selectedView) {
       case 'overview':
@@ -576,6 +939,24 @@ const AdminDashboard = () => {
         return <Typography variant="h4">Transaction Management - Coming Soon</Typography>;
       case 'routers':
         return renderMikrotikManagement();
+      case 'firewall':
+        return renderFirewall();
+      case 'dhcp':
+        return renderDhcp();
+      case 'queues':
+        return renderQueues();
+      case 'pppoe':
+        return renderPPPoE();
+      case 'scheduler':
+        return renderScheduler();
+      case 'backups':
+        return renderBackups();
+      case 'logs':
+        return renderLogs();
+      case 'interfaces':
+        return renderInterfaces();
+      case 'firmware':
+        return renderFirmware();
       case 'reports':
         return renderReports();
       case 'monitoring':
