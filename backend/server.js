@@ -105,28 +105,41 @@ app.use('*', (req, res) => {
 
 // Initialize connections and start server
 const startServer = async () => {
-  // Start server first
-  server.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
-    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
+  try {
+    console.log('Starting server initialization...');
+    
+    // Start server first
+    server.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+    console.log('HTTP server started...');
 
-  // Try to connect to database (non-blocking)
-  try {
-    await connectDatabase();
-    logger.info('Database connected successfully');
+    // Try to connect to database (non-blocking)
+    try {
+      console.log('Attempting database connection...');
+      await connectDatabase();
+      logger.info('Database connected successfully');
+    } catch (error) {
+      logger.error('Database connection failed (will retry later):', error.message);
+      // Don't exit - continue without database for now
+    }
+    
+    // Try to connect to Redis (non-blocking)
+    try {
+      console.log('Attempting Redis connection...');
+      await connectRedis();
+      logger.info('Redis connected successfully');
+    } catch (error) {
+      logger.error('Redis connection failed (will retry later):', error.message);
+      // Don't exit - continue without Redis for now
+    }
+    
+    console.log('Server initialization completed');
   } catch (error) {
-    logger.error('Database connection failed (will retry later):', error.message);
-    // Don't exit - continue without database for now
-  }
-  
-  // Try to connect to Redis (non-blocking)
-  try {
-    await connectRedis();
-    logger.info('Redis connected successfully');
-  } catch (error) {
-    logger.error('Redis connection failed (will retry later):', error.message);
-    // Don't exit - continue without Redis for now
+    console.error('Fatal error during server startup:', error);
+    console.error('Stack trace:', error.stack);
+    process.exit(1);
   }
 };
 
