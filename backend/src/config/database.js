@@ -4,7 +4,10 @@ const logger = require('../utils/logger');
 const knexConfig = {
   development: {
     client: 'postgresql',
-    connection: {
+    connection: process.env.DATABASE_URL ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    } : {
       host: process.env.DB_HOST || 'localhost',
       port: process.env.DB_PORT || 5432,
       database: process.env.DB_NAME || 'wifi_billing',
