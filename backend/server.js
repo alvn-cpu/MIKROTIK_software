@@ -105,24 +105,28 @@ app.use('*', (req, res) => {
 
 // Initialize connections and start server
 const startServer = async () => {
+  // Start server first
+  server.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+
+  // Try to connect to database (non-blocking)
   try {
-    // Connect to database
     await connectDatabase();
     logger.info('Database connected successfully');
-    
-    // Connect to Redis
+  } catch (error) {
+    logger.error('Database connection failed (will retry later):', error.message);
+    // Don't exit - continue without database for now
+  }
+  
+  // Try to connect to Redis (non-blocking)
+  try {
     await connectRedis();
     logger.info('Redis connected successfully');
-    
-    // Start server
-    server.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
-    
   } catch (error) {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
+    logger.error('Redis connection failed (will retry later):', error.message);
+    // Don't exit - continue without Redis for now
   }
 };
 

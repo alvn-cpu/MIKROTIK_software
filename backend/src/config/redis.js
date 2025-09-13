@@ -1,27 +1,19 @@
-const redis = require('redis');
+const Redis = require('ioredis');
 const logger = require('../utils/logger');
 
 let redisClient;
 
 const connectRedis = async () => {
   try {
-    redisClient = redis.createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-      retry_strategy: (options) => {
-        if (options.error && options.error.code === 'ECONNREFUSED') {
-          logger.error('Redis connection refused');
-          return new Error('Redis connection refused');
-        }
-        if (options.total_retry_time > 1000 * 60 * 60) {
-          logger.error('Redis retry time exhausted');
-          return new Error('Retry time exhausted');
-        }
-        if (options.attempt > 10) {
-          logger.error('Redis max attempts reached');
-          return undefined;
-        }
-        return Math.min(options.attempt * 100, 3000);
-      }
+    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    
+    redisClient = new Redis(redisUrl, {
+      retryDelayOnFailover: 100,
+      enableReadyCheck: true,
+      maxRetriesPerRequest: 3,
+      lazyConnect: true,
+      connectTimeout: 10000,
+      commandTimeout: 5000
     });
 
     redisClient.on('error', (err) => {
@@ -36,13 +28,12 @@ const connectRedis = async () => {
       logger.info('Redis client ready');
     });
 
-    redisClient.on('end', () => {
-      logger.info('Redis connection ended');
+    redisClient.on('close', () => {
+      logger.info('Redis connection closed');
     });
 
+    // Connect and test
     await redisClient.connect();
-    
-    // Test the connection
     await redisClient.ping();
     
     return redisClient;
@@ -63,7 +54,7 @@ const getRedisClient = () => {
 const setSession = async (key, data, expireInSeconds = 3600) => {
   try {
     const client = getRedisClient();
-    await client.setEx(key, expireInSeconds, JSON.stringify(data));
+    await client.setex(key, expireInSeconds, JSON.stringify(data));
     return true;
   } catch (error) {
     logger.error('Error setting session:', error);
