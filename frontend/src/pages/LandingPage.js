@@ -1,1 +1,187 @@
-import React from 'react';\nimport {\n  Container,\n  Box,\n  Typography,\n  Button,\n  Card,\n  CardContent,\n  Grid,\n  Paper,\n  Divider,\n} from '@mui/material';\nimport {\n  Wifi as WifiIcon,\n  Speed as SpeedIcon,\n  Security as SecurityIcon,\n  Payment as PaymentIcon,\n} from '@mui/icons-material';\nimport { useNavigate } from 'react-router-dom';\n\nconst LandingPage = () => {\n  const navigate = useNavigate();\n\n  const features = [\n    {\n      icon: <WifiIcon sx={{ fontSize: 40, color: 'primary.main' }} />,\n      title: 'High-Speed Internet',\n      description: 'Enjoy blazing fast WiFi speeds for all your needs'\n    },\n    {\n      icon: <SecurityIcon sx={{ fontSize: 40, color: 'primary.main' }} />,\n      title: 'Secure Connection',\n      description: 'Enterprise-grade security to protect your data'\n    },\n    {\n      icon: <PaymentIcon sx={{ fontSize: 40, color: 'primary.main' }} />,\n      title: 'Easy Payment',\n      description: 'Pay with M-Pesa or KCB Buni for instant access'\n    },\n    {\n      icon: <SpeedIcon sx={{ fontSize: 40, color: 'primary.main' }} />,\n      title: 'Instant Access',\n      description: 'Get connected immediately after payment'\n    },\n  ];\n\n  return (\n    <Container maxWidth=\"lg\">\n      <Box sx={{ py: 4 }}>\n        {/* Header */}\n        <Box sx={{ textAlign: 'center', mb: 6 }}>\n          <Typography variant=\"h2\" component=\"h1\" gutterBottom>\n            Welcome to WiFi Billing\n          </Typography>\n          <Typography variant=\"h6\" color=\"text.secondary\" paragraph>\n            Get connected with our secure, high-speed internet access\n          </Typography>\n        </Box>\n\n        {/* Features Grid */}\n        <Grid container spacing={4} sx={{ mb: 6 }}>\n          {features.map((feature, index) => (\n            <Grid item xs={12} sm={6} md={3} key={index}>\n              <Paper\n                elevation={2}\n                sx={{\n                  p: 3,\n                  textAlign: 'center',\n                  height: '100%',\n                  display: 'flex',\n                  flexDirection: 'column',\n                  alignItems: 'center'\n                }}\n              >\n                {feature.icon}\n                <Typography variant=\"h6\" component=\"h3\" sx={{ mt: 2, mb: 1 }}>\n                  {feature.title}\n                </Typography>\n                <Typography variant=\"body2\" color=\"text.secondary\">\n                  {feature.description}\n                </Typography>\n              </Paper>\n            </Grid>\n          ))}\n        </Grid>\n\n        {/* Main Action Card */}\n        <Card sx={{ mb: 4 }}>\n          <CardContent sx={{ p: 4, textAlign: 'center' }}>\n            <Typography variant=\"h4\" component=\"h2\" gutterBottom>\n              Ready to Get Connected?\n            </Typography>\n            <Typography variant=\"body1\" color=\"text.secondary\" paragraph>\n              Choose from our flexible data plans and get instant internet access\n            </Typography>\n            \n            <Box sx={{ mt: 3 }}>\n              <Button\n                variant=\"contained\"\n                size=\"large\"\n                onClick={() => navigate('/plans')}\n                sx={{ mr: 2, mb: { xs: 2, sm: 0 } }}\n              >\n                View Plans\n              </Button>\n              <Button\n                variant=\"outlined\"\n                size=\"large\"\n                onClick={() => navigate('/login')}\n              >\n                Sign In\n              </Button>\n            </Box>\n          </CardContent>\n        </Card>\n\n        {/* How It Works */}\n        <Paper sx={{ p: 4 }}>\n          <Typography variant=\"h5\" component=\"h2\" gutterBottom textAlign=\"center\">\n            How It Works\n          </Typography>\n          \n          <Grid container spacing={3} sx={{ mt: 2 }}>\n            <Grid item xs={12} md={4}>\n              <Box sx={{ textAlign: 'center' }}>\n                <Typography \n                  variant=\"h3\" \n                  component=\"div\" \n                  color=\"primary.main\" \n                  sx={{ fontWeight: 'bold', mb: 2 }}\n                >\n                  1\n                </Typography>\n                <Typography variant=\"h6\" gutterBottom>\n                  Choose Your Plan\n                </Typography>\n                <Typography variant=\"body2\" color=\"text.secondary\">\n                  Select from our variety of data packages that suit your needs\n                </Typography>\n              </Box>\n            </Grid>\n            \n            <Grid item xs={12} md={4}>\n              <Box sx={{ textAlign: 'center' }}>\n                <Typography \n                  variant=\"h3\" \n                  component=\"div\" \n                  color=\"primary.main\" \n                  sx={{ fontWeight: 'bold', mb: 2 }}\n                >\n                  2\n                </Typography>\n                <Typography variant=\"h6\" gutterBottom>\n                  Make Payment\n                </Typography>\n                <Typography variant=\"body2\" color=\"text.secondary\">\n                  Pay securely using M-Pesa STK Push or KCB Buni mobile banking\n                </Typography>\n              </Box>\n            </Grid>\n            \n            <Grid item xs={12} md={4}>\n              <Box sx={{ textAlign: 'center' }}>\n                <Typography \n                  variant=\"h3\" \n                  component=\"div\" \n                  color=\"primary.main\" \n                  sx={{ fontWeight: 'bold', mb: 2 }}\n                >\n                  3\n                </Typography>\n                <Typography variant=\"h6\" gutterBottom>\n                  Get Connected\n                </Typography>\n                <Typography variant=\"body2\" color=\"text.secondary\">\n                  Enjoy instant internet access once payment is confirmed\n                </Typography>\n              </Box>\n            </Grid>\n          </Grid>\n        </Paper>\n      </Box>\n    </Container>\n  );\n};\n\nexport default LandingPage;
+import React from 'react';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Paper,
+  Divider,
+} from '@mui/material';
+import {
+  Wifi as WifiIcon,
+  Speed as SpeedIcon,
+  Security as SecurityIcon,
+  Payment as PaymentIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+
+const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const features = [
+    {
+      icon: <WifiIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      title: 'High-Speed Internet',
+      description: 'Enjoy blazing fast WiFi speeds for all your needs'
+    },
+    {
+      icon: <SecurityIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      title: 'Secure Connection',
+      description: 'Enterprise-grade security to protect your data'
+    },
+    {
+      icon: <PaymentIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      title: 'Easy Payment',
+      description: 'Pay with M-Pesa or KCB Buni for instant access'
+    },
+    {
+      icon: <SpeedIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      title: 'Instant Access',
+      description: 'Get connected immediately after payment'
+    },
+  ];
+
+  return (
+    <Container maxWidth="lg">
+      <Box sx={{ py: 4 }}>
+        {/* Header */}
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Typography variant="h2" component="h1" gutterBottom>
+            Welcome to WiFi Billing
+          </Typography>
+          <Typography variant="h6" color="text.secondary" paragraph>
+            Get connected with our secure, high-speed internet access
+          </Typography>
+        </Box>
+
+        {/* Features Grid */}
+        <Grid container spacing={4} sx={{ mb: 6 }}>
+          {features.map((feature, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}
+              >
+                {feature.icon}
+                <Typography variant="h6" component="h3" sx={{ mt: 2, mb: 1 }}>
+                  {feature.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {feature.description}
+                </Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Main Action Card */}
+        <Card sx={{ mb: 4 }}>
+          <CardContent sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="h4" component="h2" gutterBottom>
+              Ready to Get Connected?
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              Choose from our flexible data plans and get instant internet access
+            </Typography>
+            
+            <Box sx={{ mt: 3 }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => navigate('/plans')}
+                sx={{ mr: 2, mb: { xs: 2, sm: 0 } }}
+              >
+                View Plans
+              </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={() => navigate('/login')}
+              >
+                Sign In
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* How It Works */}
+        <Paper sx={{ p: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom textAlign="center">
+            How It Works
+          </Typography>
+          
+          <Grid container spacing={3} sx={{ mt: 2 }}>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography 
+                  variant="h3" 
+                  component="div" 
+                  color="primary.main" 
+                  sx={{ fontWeight: 'bold', mb: 2 }}
+                >
+                  1
+                </Typography>
+                <Typography variant="h6" gutterBottom>
+                  Choose Your Plan
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Select from our variety of data packages that suit your needs
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography 
+                  variant="h3" 
+                  component="div" 
+                  color="primary.main" 
+                  sx={{ fontWeight: 'bold', mb: 2 }}
+                >
+                  2
+                </Typography>
+                <Typography variant="h6" gutterBottom>
+                  Make Payment
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Pay securely using M-Pesa STK Push or KCB Buni mobile banking
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography 
+                  variant="h3" 
+                  component="div" 
+                  color="primary.main" 
+                  sx={{ fontWeight: 'bold', mb: 2 }}
+                >
+                  3
+                </Typography>
+                <Typography variant="h6" gutterBottom>
+                  Get Connected
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Enjoy instant internet access once payment is confirmed
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Box>
+    </Container>
+  );
+};
+
+export default LandingPage;
