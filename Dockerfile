@@ -1,26 +1,20 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-alpine AS base
-WORKDIR /app
-COPY package*.json .npmrc* ./
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
-RUN npm ci --omit=optional --no-audit --no-fund
-
 # Frontend build
 FROM node:20-alpine AS frontend-build
 WORKDIR /app
+# Copy package.json files for dependencies
 COPY package*.json .npmrc* ./
-COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
+# Install dependencies
 RUN npm ci --omit=optional --no-audit --no-fund
+# Build frontend
 WORKDIR /app/frontend
 COPY frontend ./
 RUN npm run build
 
-# Backend
-FROM frontend-build AS backend
-WORKDIR /app/backend
-COPY backend ./
-ENV NODE_ENV=production
-CMD ["node", "server.js"]
+# Final image with static files
+FROM nginx:alpine AS frontend
+COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

@@ -42,8 +42,4 @@
     "eslint": "^8.45.0",
     "prettier": "^3.0.0"
   },
-  "workspaces": [
-    "backend",
-    "frontend"
-  ]
 }
