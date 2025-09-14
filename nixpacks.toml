@@ -1,0 +1,14 @@
+# Nixpacks configuration for Railway deployment
+[phases.build]
+cmds = [
+    "npm ci --omit=optional --no-audit --no-fund",
+    "cd frontend && npm run build",
+    "mkdir -p backend/public",
+    "cp -r frontend/build/* backend/public/ || true"
+]
+
+[phases.start]
+cmd = "cd backend && node server.js"
+
+[variables]
+NODE_ENV = "production"

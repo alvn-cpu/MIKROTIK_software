@@ -54,12 +54,28 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from React build
-const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
 const fs = require('fs');
 
-// Check if frontend build exists
-const frontendExists = fs.existsSync(frontendBuildPath);
-console.log('Frontend build path:', frontendBuildPath);
+// Try multiple possible frontend build paths (for different deployment environments)
+const possiblePaths = [
+  path.join(__dirname, 'public'),           // Railway/Docker build
+  path.join(__dirname, '..', 'frontend', 'build'), // Development/local
+  path.join(__dirname, 'build')             // Alternative build location
+];
+
+let frontendBuildPath = null;
+let frontendExists = false;
+
+for (const buildPath of possiblePaths) {
+  if (fs.existsSync(buildPath) && fs.existsSync(path.join(buildPath, 'index.html'))) {
+    frontendBuildPath = buildPath;
+    frontendExists = true;
+    break;
+  }
+}
+
+console.log('Checked frontend build paths:', possiblePaths);
+console.log('Selected frontend build path:', frontendBuildPath);
 console.log('Frontend build exists:', frontendExists);
 
 if (frontendExists) {

@@ -1,40 +1,36 @@
-# syntax=docker/dockerfile:1
-
-# Use Node.js 20 alpine as base
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package.json files
+# Copy all package.json files first for better layer caching
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 
-# Install dependencies
+# Install root and backend dependencies
 RUN npm ci --omit=optional --no-audit --no-fund
+RUN cd backend && npm ci --only=production --omit=optional --no-audit --no-fund
 
-# Copy backend source
+# Install frontend dependencies and build
+RUN cd frontend && npm ci --omit=optional --no-audit --no-fund
+
+# Copy source code
+COPY frontend ./frontend
 COPY backend ./backend
 
-# Copy frontend source and build
-COPY frontend ./frontend
-WORKDIR /app/frontend
-RUN npm run build
+# Build frontend
+RUN cd frontend && npm run build
 
-# Switch back to app directory
-WORKDIR /app
+# Create public directory in backend and copy build files
+RUN mkdir -p backend/public && cp -r frontend/build/* backend/public/
 
-# Copy frontend build to backend public directory
-RUN cp -r /app/frontend/build/* /app/backend/public/ 2>/dev/null || mkdir -p /app/backend/public && cp -r /app/frontend/build/* /app/backend/public/
-
-# Switch to backend directory
+# Set working directory to backend
 WORKDIR /app/backend
 
-# Expose port
-EXPOSE 3000
+# Expose port (Railway will override this)
+EXPOSE $PORT
 
-# Set environment
 ENV NODE_ENV=production
 
-# Start the server
+# Start the application
 CMD ["node", "server.js"]
