@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Billing Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card h3 {
+            color: #2563eb;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+        
+        .api-endpoint {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+        
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .response-area {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background: #10b981;
+        }
+        
+        .system-status {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .system-status h3 {
+            color: white;
+            border-bottom-color: rgba(255,255,255,0.3);
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌐 WiFi Billing System - Admin Dashboard</h1>
+        <p>Manage your WiFi billing system through API endpoints</p>
+    </div>
+    
+    <div class="container">
+        <!-- System Status -->
+        <div class="card system-status">
+            <h3>System Status</h3>
+            <p><span class="status-indicator status-online"></span>Backend API: Online</p>
+            <p><span class="status-indicator status-online"></span>Railway Deployment: Active</p>
+            <p><span class="status-indicator status-online"></span>Database: Connected</p>
+            <div id="system-info"></div>
+        </div>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Admin Management -->
+            <div class="card">
+                <h3>📊 Admin Management</h3>
+                <button class="btn" onclick="callAPI('/api/admin/dashboard')">Dashboard Stats</button>
+                <button class="btn" onclick="callAPI('/api/admin/stats')">System Statistics</button>
+                <button class="btn" onclick="callAPI('/api/admin/reports/revenue')">Revenue Reports</button>
+                <button class="btn" onclick="callAPI('/api/admin/reports/usage')">Usage Reports</button>
+                <button class="btn" onclick="callAPI('/api/admin/system/config')">System Config</button>
+            </div>
+            
+            <!-- User Management -->
+            <div class="card">
+                <h3>👥 User Management</h3>
+                <button class="btn" onclick="callAPI('/api/users')">All Users</button>
+                <button class="btn" onclick="callAPI('/api/auth')">Auth Info</button>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                    Manage user accounts, view online users, and handle authentication.
+                </p>
+            </div>
+            
+            <!-- Billing Plans -->
+            <div class="card">
+                <h3>💰 Billing Plans</h3>
+                <button class="btn" onclick="callAPI('/api/plans')">View Plans</button>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                    Manage data packages, pricing, and billing configurations.
+                </p>
+            </div>
+            
+            <!-- Payment Processing -->
+            <div class="card">
+                <h3>💳 Payment Processing</h3>
+                <button class="btn" onclick="callAPI('/api/payments')">Payment Methods</button>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                    M-Pesa STK Push, KCB Buni, and transaction management.
+                </p>
+            </div>
+            
+            <!-- MikroTik Management -->
+            <div class="card">
+                <h3>🖥️ MikroTik Management</h3>
+                <button class="btn" onclick="callAPI('/api/mikrotik')">Router Status</button>
+                <button class="btn" onclick="callAPI('/api/radius')">RADIUS Server</button>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                    Manage routers, monitor connections, and configure network settings.
+                </p>
+            </div>
+            
+            <!-- Portal Management -->
+            <div class="card">
+                <h3>🌐 Portal Management</h3>
+                <button class="btn" onclick="callAPI('/api/portal')">Portal Config</button>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #6b7280;">
+                    Captive portal settings and user redirection management.
+                </p>
+            </div>
+        </div>
+        
+        <!-- API Response Area -->
+        <div class="card">
+            <h3>API Response</h3>
+            <button class="btn btn-secondary" onclick="clearResponse()">Clear</button>
+            <div id="api-response" class="response-area">Click any button above to see API responses here...</div>
+        </div>
+        
+        <!-- Available Endpoints -->
+        <div class="card">
+            <h3>🔗 Available API Endpoints</h3>
+            <ul class="feature-list">
+                <li><strong>Health Check:</strong> <code>/health</code></li>
+                <li><strong>API Documentation:</strong> <code>/api</code></li>
+                <li><strong>Admin Dashboard:</strong> <code>/api/admin</code></li>
+                <li><strong>User Management:</strong> <code>/api/users</code></li>
+                <li><strong>Billing Plans:</strong> <code>/api/plans</code></li>
+                <li><strong>Payment Processing:</strong> <code>/api/payments</code></li>
+                <li><strong>MikroTik Management:</strong> <code>/api/mikrotik</code></li>
+                <li><strong>RADIUS Server:</strong> <code>/api/radius</code></li>
+                <li><strong>Portal Management:</strong> <code>/api/portal</code></li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'https://wifi-billing-backend-production.up.railway.app';
+        
+        async function callAPI(endpoint) {
+            const responseDiv = document.getElementById('api-response');
+            responseDiv.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(API_BASE + endpoint);
+                const data = await response.json();
+                
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                responseDiv.style.background = response.ok ? '#1f2937' : '#7f1d1d';
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+                responseDiv.style.background = '#7f1d1d';
+            }
+        }
+        
+        function clearResponse() {
+            document.getElementById('api-response').textContent = 'Click any button above to see API responses here...';
+            document.getElementById('api-response').style.background = '#1f2937';
+        }
+        
+        // Load system info on page load
+        window.addEventListener('load', () => {
+            callAPI('/health');
+        });
+    </script>
+</body>
+</html>
