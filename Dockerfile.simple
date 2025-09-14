@@ -1,0 +1,39 @@
+# Simple Dockerfile matching the deployment platform's pattern
+FROM node:20-alpine AS frontend-build
+WORKDIR /app
+
+# Copy package files exactly as shown in error
+COPY package*.json .npmrc* ./
+COPY backend/package*.json ./backend/
+COPY frontend/package*.json ./frontend/
+
+# Install dependencies
+RUN npm ci --omit=optional --no-audit --no-fund
+
+# Switch to frontend directory and copy frontend files
+WORKDIR /app/frontend
+COPY frontend ./
+
+# Verify the public directory exists
+RUN ls -la
+RUN ls -la public/ || echo "public directory not found"
+RUN test -f public/index.html && echo "index.html found" || echo "index.html NOT found"
+
+# Build frontend
+RUN npm run build
+
+# Backend stage
+FROM node:20-alpine AS backend
+WORKDIR /app
+
+# Copy backend
+COPY backend/package*.json ./
+RUN npm ci --only=production --omit=optional --no-audit --no-fund
+COPY backend ./
+
+# Copy frontend build
+COPY --from=frontend-build /app/frontend/build ./public
+
+EXPOSE 3000
+ENV NODE_ENV=production
+CMD ["node", "server.js"]

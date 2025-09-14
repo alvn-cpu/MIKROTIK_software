@@ -1,43 +1,34 @@
 # syntax=docker/dockerfile:1
 
-# Multi-stage Dockerfile for monorepo with frontend and backend
+# Use Node.js 20 alpine as base
+FROM node:20-alpine
 
-# Frontend build stage
-FROM node:20-alpine AS frontend-build
 WORKDIR /app
 
-# Copy root package.json first (if exists)
-COPY package*.json .npmrc* ./
-
-# Copy backend package.json (in case of workspace dependencies)
+# Copy package.json files
+COPY package*.json ./
 COPY backend/package*.json ./backend/
-
-# Copy frontend package.json
 COPY frontend/package*.json ./frontend/
 
-# Install all dependencies
+# Install dependencies
 RUN npm ci --omit=optional --no-audit --no-fund
 
-# Build frontend
+# Copy backend source
+COPY backend ./backend
+
+# Copy frontend source and build
+COPY frontend ./frontend
 WORKDIR /app/frontend
-COPY frontend ./
 RUN npm run build
 
-# Backend stage
-FROM node:20-alpine AS backend
+# Switch back to app directory
 WORKDIR /app
 
-# Copy backend package.json
-COPY backend/package*.json ./
+# Copy frontend build to backend public directory
+RUN cp -r /app/frontend/build/* /app/backend/public/ 2>/dev/null || mkdir -p /app/backend/public && cp -r /app/frontend/build/* /app/backend/public/
 
-# Install backend dependencies
-RUN npm ci --only=production --omit=optional --no-audit --no-fund
-
-# Copy backend source
-COPY backend ./
-
-# Copy frontend build to serve as static files
-COPY --from=frontend-build /app/frontend/build ./public
+# Switch to backend directory
+WORKDIR /app/backend
 
 # Expose port
 EXPOSE 3000
@@ -45,5 +36,5 @@ EXPOSE 3000
 # Set environment
 ENV NODE_ENV=production
 
-# Start the backend server
+# Start the server
 CMD ["node", "server.js"]

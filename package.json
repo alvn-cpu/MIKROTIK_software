@@ -5,9 +5,10 @@
   "main": "backend/server.js",
   "scripts": {
     "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
-    "start": "npm run build:frontend && npm run backend:start",
-    "build": "npm run build:frontend",
-    "build:frontend": "npm install --prefix frontend && cd frontend && npm run build",
+    "start": "node backend/server.js",
+    "build": "npm run install:all && npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "prestart": "npm run build",
     "backend:dev": "cd backend && npm run dev",
     "backend:start": "cd backend && npm start",
     "frontend:dev": "cd frontend && npm run dev",
