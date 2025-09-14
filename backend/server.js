@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 require('dotenv').config();
 
 const logger = require('./src/utils/logger');
@@ -52,14 +53,18 @@ app.use('/api', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files from React build
+const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
+app.use(express.static(frontendBuildPath));
+
 // Logging middleware
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path} - ${req.ip}`);
   next();
 });
 
-// Root route
-app.get('/', (req, res) => {
+// API info route (moved to /api)
+app.get('/api', (req, res) => {
   res.json({ 
     message: 'WiFi Billing API Server',
     status: 'OK', 
@@ -117,12 +122,24 @@ io.on('connection', (socket) => {
 // Make io available to routes
 app.set('socketio', io);
 
-// Error handling middleware (must be last)
-app.use(errorHandler);
+// Error handling middleware
+app.use('/api/*', errorHandler);
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+// Catch-all handler: serve React app for non-API routes
+app.get('*', (req, res) => {
+  // Don't serve React app for API routes that aren't found
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  
+  // Serve React app for all other routes
+  const indexPath = path.join(frontendBuildPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      logger.error('Error serving React app:', err);
+      res.status(500).json({ error: 'Failed to serve application' });
+    }
+  });
 });
 
 // Initialize connections and start server
