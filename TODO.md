@@ -4,6 +4,8 @@
 - [x] Fix Dockerfile to properly copy package.json files before npm install for workspaces
 - [x] Build React frontend locally
 - [x] Update Dockerfile to build frontend during Docker build and include in backend image
+- [x] Fix multi-stage build to have backend inherit from frontend-build stage
+- [x] Ensure frontend dependencies are properly installed in frontend-build stage
 - [x] Backend server.js already configured to serve React frontend for routes like /admin
 - [x] Push changes to repository and redeploy on Railway
 
