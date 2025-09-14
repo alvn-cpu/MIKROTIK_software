@@ -20,3 +20,4 @@ COPY backend ./
 COPY --from=frontend-build /app/frontend/build ../frontend/build
 ENV NODE_ENV=production
 CMD ["node", "server.js"]
+
