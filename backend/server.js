@@ -55,7 +55,19 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from React build
 const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
-app.use(express.static(frontendBuildPath));
+const fs = require('fs');
+
+// Check if frontend build exists
+const frontendExists = fs.existsSync(frontendBuildPath);
+console.log('Frontend build path:', frontendBuildPath);
+console.log('Frontend build exists:', frontendExists);
+
+if (frontendExists) {
+  app.use(express.static(frontendBuildPath));
+  console.log('✅ Serving React frontend from:', frontendBuildPath);
+} else {
+  console.log('⚠️  Frontend build not found, serving API only');
+}
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -132,12 +144,42 @@ app.get('*', (req, res) => {
     return res.status(404).json({ error: 'API route not found' });
   }
   
+  // Check if frontend is available
+  if (!frontendExists) {
+    return res.json({
+      message: 'WiFi Billing API Server',
+      status: 'Frontend not available',
+      info: 'The React frontend is not built yet. API endpoints are available at /api/*',
+      build_path: frontendBuildPath,
+      endpoints: {
+        health: '/health',
+        api_info: '/api',
+        admin: '/api/admin',
+        auth: '/api/auth',
+        users: '/api/users',
+        plans: '/api/plans',
+        payments: '/api/payments',
+        radius: '/api/radius',
+        mikrotik: '/api/mikrotik',
+        portal: '/api/portal'
+      }
+    });
+  }
+  
   // Serve React app for all other routes
   const indexPath = path.join(frontendBuildPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
       logger.error('Error serving React app:', err);
-      res.status(500).json({ error: 'Failed to serve application' });
+      logger.error('Index path:', indexPath);
+      logger.error('Frontend build path:', frontendBuildPath);
+      logger.error('Error details:', err.message);
+      res.status(500).json({ 
+        error: 'Failed to serve application',
+        details: err.message,
+        indexPath: indexPath,
+        buildPath: frontendBuildPath
+      });
     }
   });
 });
