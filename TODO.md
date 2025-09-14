@@ -25,3 +25,4 @@
 - Dockerfile now builds the React frontend and copies it to the backend image
 - Backend serves the React app for non-API routes, allowing /admin to load the AdminDashboard component
 - If frontend build fails during deployment, backend will serve API-only mode with helpful messages
+-
