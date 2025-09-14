@@ -4,6 +4,19 @@ const Sessions = require('../models/sessions');
 const Accounting = require('../models/accounting');
 const logger = require('../utils/logger');
 
+// Root route - lists available RADIUS endpoints
+router.get('/', (req, res) => {
+  res.json({ 
+    message: 'RADIUS API endpoints',
+    endpoints: {
+      auth: 'POST /api/radius/auth',
+      accounting: 'POST /api/radius/accounting',
+      sessions: 'GET /api/radius/sessions',
+      disconnect_session: 'DELETE /api/radius/sessions/:sessionId'
+    }
+  });
+});
+
 // RADIUS REST: authentication
 router.post('/auth', async (req, res) => {
   // Accept or reject based on your own logic. For now accept all demo users.

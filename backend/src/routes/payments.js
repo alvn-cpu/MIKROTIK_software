@@ -5,6 +5,19 @@ const kcbService = require('../services/kcbBuniService');
 const Transactions = require('../models/transactions');
 const Plans = require('../models/plans');
 
+// Root route - lists available payment endpoints
+router.get('/', (req, res) => {
+  res.json({ 
+    message: 'Payment API endpoints',
+    endpoints: {
+      daraja_stk_push: 'POST /api/payments/daraja/stk-push',
+      daraja_callback: 'POST /api/payments/daraja/callback',
+      kcb_buni_payment: 'POST /api/payments/kcb-buni/payment',
+      kcb_buni_callback: 'POST /api/payments/kcb-buni/callback'
+    }
+  });
+});
+
 // Initiate Daraja STK Push
 router.post('/daraja/stk-push', async (req, res, next) => {
   try {

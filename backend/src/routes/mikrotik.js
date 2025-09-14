@@ -4,6 +4,17 @@ const mikrotik = require('../services/mikrotikService');
 const { authMiddleware, requireAdmin } = require('../services/authService');
 const { requireTrustedStation } = require('../middleware/nasTrust');
 
+// Root route - lists available MikroTik endpoints
+router.get('/', (req, res) => {
+  res.json({ 
+    message: 'MikroTik API endpoints',
+    endpoints: {
+      active_users: 'GET /api/mikrotik/active-users',
+      disconnect_user: 'POST /api/mikrotik/disconnect/:username'
+    }
+  });
+});
+
 // Get active hotspot users
 router.get('/active-users', authMiddleware, requireAdmin, async (req, res, next) => {
   try {

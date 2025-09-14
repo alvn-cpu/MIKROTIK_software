@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const { generateMikrotikConfig } = require('../services/mikrotikConfigGenerator');
 
+// Root route - lists available config endpoints
+router.get('/', (req, res) => {
+  res.json({ 
+    message: 'MikroTik Config API endpoints',
+    endpoints: {
+      generate_config: 'POST /api/mikrotik/config'
+    },
+    description: 'Generate downloadable MikroTik RouterOS configuration scripts'
+  });
+});
+
 // POST /api/mikrotik/config
 // Body: {
 //   stationName, routerIp, hotspotInterface, hotspotName, addressPool,

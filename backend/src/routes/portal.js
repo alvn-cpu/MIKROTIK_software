@@ -4,6 +4,17 @@ const logger = require('../utils/logger');
 const Sessions = require('../models/sessions');
 const radiusClient = require('../services/radiusClient');
 
+// Root route - lists available portal endpoints
+router.get('/', (req, res) => {
+  res.json({ 
+    message: 'Portal API endpoints',
+    endpoints: {
+      redirect: 'GET /api/portal/redirect',
+      payment_confirm: 'POST /api/portal/payment/confirm'
+    }
+  });
+});
+
 // GET /api/portal/redirect
 // Accepts MikroTik hotspot query params and returns basic info or redirects as needed.
 // Typical MikroTik params: username, ip, mac, link-login, link-orig, error

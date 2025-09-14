@@ -5,6 +5,19 @@ const router = express.Router();
 // These will be implemented in subsequent todos
 
 const { register, login, authMiddleware, sanitize } = require('../services/authService');
+
+// Root route - lists available auth endpoints
+router.get('/', (req, res) => {
+  res.json({ 
+    message: 'Authentication API endpoints',
+    endpoints: {
+      register: 'POST /api/auth/register',
+      login: 'POST /api/auth/login',
+      logout: 'POST /api/auth/logout',
+      current_user: 'GET /api/auth/me'
+    }
+  });
+});
 const { body } = require('express-validator');
 const validate = require('../middleware/validate');
 
