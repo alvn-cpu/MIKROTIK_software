@@ -1,24 +1,34 @@
-# Railway.com optimized Nixpacks configuration
+# Railway.com NIXPACKS configuration - Updated to force cache refresh
+# This file forces Railway to use Nixpacks instead of Docker
+
 [phases.setup]
-cmds = ["echo 'Setting up Railway deployment for WiFi Billing System'"]
+cmds = ["echo 'Railway Nixpacks build for WiFi Billing System - v2.0'"]
 
 [phases.install]
 cmds = [
+    "echo 'Installing dependencies with Nixpacks...'",
     "npm install --legacy-peer-deps --no-audit --no-fund",
     "cd backend && npm install --only=production --no-audit --no-fund",
     "cd frontend && npm install --legacy-peer-deps --no-audit --no-fund"
 ]
 
-[phases.build]
+[phases.build] 
 cmds = [
+    "echo 'Running prebuild verification...'",
+    "node prebuild.js",
+    "echo 'Building frontend with Nixpacks...'", 
     "cd frontend && npm run build",
+    "echo 'Copying frontend build to backend...'",
     "mkdir -p backend/public",
-    "cp -r frontend/build/* backend/public/"
+    "cp -r frontend/build/* backend/public/",
+    "echo 'Build complete!'"
 ]
 
 [phases.start]
-cmd = "cd backend && npm start"
+cmd = "npm start"
 
 [variables]
 NODE_ENV = "production"
-PORT = "3000"
+NIXPACKS_NODE_VERSION = "20"
+NIXPACKS_INSTALL_CMD = "npm install --legacy-peer-deps"
+FORCE_NIXPACKS = "true"
