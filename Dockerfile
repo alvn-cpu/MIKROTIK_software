@@ -3,13 +3,14 @@
 # Frontend build
 FROM node:20-alpine AS frontend-build
 WORKDIR /app
-# Copy package.json files for dependencies
-COPY package*.json .npmrc* ./
+
+# Copy only frontend package.json first
 COPY frontend/package*.json ./frontend/
-# Install dependencies
-RUN npm ci --omit=optional --no-audit --no-fund
-# Build frontend
 WORKDIR /app/frontend
+# Install frontend dependencies
+RUN npm ci --omit=optional --no-audit --no-fund
+
+# Copy frontend source code and build
 COPY frontend ./
 RUN npm run build
 
