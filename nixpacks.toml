@@ -1,7 +1,9 @@
 # Nixpacks configuration for Railway deployment
 [phases.build]
 cmds = [
-    "npm ci --omit=optional --no-audit --no-fund",
+    "npm ci --omit=optional --no-audit --no-fund || npm install --omit=optional --no-audit --no-fund",
+    "cd backend && npm ci --only=production --omit=optional --no-audit --no-fund || npm install --only=production --no-audit --no-fund", 
+    "cd frontend && npm ci --legacy-peer-deps --omit=optional --no-audit --no-fund || npm install --legacy-peer-deps --no-audit --no-fund",
     "cd frontend && npm run build",
     "mkdir -p backend/public",
     "cp -r frontend/build/* backend/public/ || true"

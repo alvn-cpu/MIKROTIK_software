@@ -7,12 +7,14 @@ COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 
-# Install root and backend dependencies
+# Install root dependencies
 RUN npm ci --omit=optional --no-audit --no-fund
+
+# Install backend dependencies  
 RUN cd backend && npm ci --only=production --omit=optional --no-audit --no-fund
 
-# Install frontend dependencies and build
-RUN cd frontend && npm ci --omit=optional --no-audit --no-fund
+# Install frontend dependencies (with legacy peer deps for React Scripts compatibility)
+RUN cd frontend && npm ci --legacy-peer-deps --omit=optional --no-audit --no-fund
 
 # Copy source code
 COPY frontend ./frontend
