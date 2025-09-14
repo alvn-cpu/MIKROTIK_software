@@ -8,6 +8,8 @@
 - [x] Ensure frontend dependencies are properly installed in frontend-build stage
 - [x] Backend server.js already configured to serve React frontend for routes like /admin
 - [x] Update backend .env file with new PostgreSQL and Redis URLs
+- [x] Fix Dockerfile to copy backend/package.json in frontend-build stage to resolve postinstall error
+- [x] Test backend server startup locally (successful)
 - [x] Push changes to repository and redeploy on Railway
 
 ## Pending Tasks
