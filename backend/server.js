@@ -139,49 +139,65 @@ app.use('/api/*', errorHandler);
 
 // Catch-all handler: serve React app for non-API routes
 app.get('*', (req, res) => {
-  // Don't serve React app for API routes that aren't found
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API route not found' });
-  }
-  
-  // Check if frontend is available
-  if (!frontendExists) {
-    return res.json({
-      message: 'WiFi Billing API Server',
-      status: 'Frontend not available',
-      info: 'The React frontend is not built yet. API endpoints are available at /api/*',
-      build_path: frontendBuildPath,
-      endpoints: {
-        health: '/health',
-        api_info: '/api',
-        admin: '/api/admin',
-        auth: '/api/auth',
-        users: '/api/users',
-        plans: '/api/plans',
-        payments: '/api/payments',
-        radius: '/api/radius',
-        mikrotik: '/api/mikrotik',
-        portal: '/api/portal'
-      }
-    });
-  }
-  
-  // Serve React app for all other routes
-  const indexPath = path.join(frontendBuildPath, 'index.html');
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      logger.error('Error serving React app:', err);
-      logger.error('Index path:', indexPath);
-      logger.error('Frontend build path:', frontendBuildPath);
-      logger.error('Error details:', err.message);
-      res.status(500).json({ 
-        error: 'Failed to serve application',
-        details: err.message,
-        indexPath: indexPath,
-        buildPath: frontendBuildPath
+  try {
+    // Don't serve React app for API routes that aren't found
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'API route not found' });
+    }
+    
+    // Check if frontend is available
+    if (!frontendExists) {
+      return res.json({
+        message: 'WiFi Billing System - Frontend Not Available',
+        status: 'Backend Only Mode',
+        info: 'The React frontend build was not found. API endpoints are available.',
+        requested_path: req.path,
+        build_path_checked: frontendBuildPath,
+        timestamp: new Date().toISOString(),
+        available_endpoints: {
+          health: '/health',
+          api_documentation: '/api',
+          admin_api: '/api/admin',
+          authentication: '/api/auth',
+          users: '/api/users',
+          plans: '/api/plans',
+          payments: '/api/payments',
+          radius: '/api/radius',
+          mikrotik: '/api/mikrotik',
+          portal: '/api/portal'
+        },
+        instructions: {
+          admin_dashboard: 'The admin dashboard will be available once the React frontend is built and deployed.',
+          api_usage: 'You can interact with all API endpoints listed above.',
+          frontend_build: 'To enable the frontend, ensure the React build process completes successfully during deployment.'
+        }
       });
     }
-  });
+    
+    // Serve React app for all other routes
+    const indexPath = path.join(frontendBuildPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error serving React app:', err);
+        return res.status(500).json({ 
+          error: 'Failed to serve React application',
+          details: err.message,
+          indexPath: indexPath,
+          buildPath: frontendBuildPath,
+          requested_path: req.path,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Catch-all route error:', error);
+    return res.status(500).json({
+      error: 'Internal server error in catch-all route',
+      details: error.message,
+      requested_path: req.path,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Initialize connections and start server
