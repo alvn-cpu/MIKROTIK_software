@@ -123,9 +123,12 @@ public
 ehthumbs.db
 Thumbs.db
 
-# Build outputs
+# Build outputs (exclude frontend build for Railway deployment)
 build/
 dist/
+# Allow frontend build directory for Railway
+!frontend/build/
+!frontend/build/**
 
 # Docker
 .docker/

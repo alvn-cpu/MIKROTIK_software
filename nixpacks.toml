@@ -1,0 +1,20 @@
+[phases.setup]
+dependsOn = ['install']
+cmds = ['echo "Setting up WiFi Billing System for Railway deployment"']
+
+[phases.install]
+cmds = [
+  'npm ci --only=production',
+  'npm ci --prefix backend --only=production', 
+  'npm ci --prefix frontend --only=production'
+]
+
+[phases.build]
+cmds = [
+  'npm run build:frontend',
+  'echo "Frontend build completed"',
+  'ls -la frontend/build || echo "Frontend build directory not found"'
+]
+
+[start]
+cmd = 'npm run backend:start'
