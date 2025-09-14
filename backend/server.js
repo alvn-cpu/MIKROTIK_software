@@ -106,6 +106,52 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Admin dashboard info route (temporary solution)
+app.get('/admin-info', (req, res) => {
+  res.json({
+    message: 'WiFi Billing Admin Dashboard Information',
+    status: 'Available',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    system_info: {
+      frontend_available: frontendExists,
+      frontend_path: frontendBuildPath,
+      node_env: process.env.NODE_ENV || 'development',
+      port: PORT
+    },
+    admin_features: {
+      user_management: 'Available at /api/users',
+      billing_plans: 'Available at /api/plans', 
+      transactions: 'Available at /api/payments',
+      mikrotik_management: 'Available at /api/mikrotik',
+      system_reports: 'Available at /api/admin/reports/revenue',
+      system_config: 'Available at /api/admin/system/config'
+    },
+    api_endpoints: {
+      admin_api: '/api/admin',
+      user_api: '/api/users',
+      plans_api: '/api/plans',
+      payments_api: '/api/payments',
+      auth_api: '/api/auth',
+      mikrotik_api: '/api/mikrotik',
+      radius_api: '/api/radius',
+      portal_api: '/api/portal'
+    },
+    instructions: {
+      current_status: 'Backend API is fully functional',
+      admin_access: 'Use the API endpoints above to manage your WiFi billing system',
+      frontend_note: frontendExists ? 'React frontend is available' : 'React frontend build not found - using API mode',
+      next_steps: [
+        'Use /api/admin for administrative functions',
+        'Use /api/users to manage users', 
+        'Use /api/plans to manage billing plans',
+        'Use /api/payments for transaction management',
+        'Use /api/mikrotik for router management'
+      ]
+    }
+  });
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
