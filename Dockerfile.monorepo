@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Multi-stage Dockerfile for monorepo with frontend and backend
 
 # Frontend build stage
@@ -23,8 +21,8 @@ WORKDIR /app/frontend
 COPY frontend ./
 RUN npm run build
 
-# Backend stage
-FROM node:20-alpine AS backend
+# Backend build stage
+FROM node:20-alpine AS backend-build
 WORKDIR /app
 
 # Copy backend package.json
@@ -35,6 +33,13 @@ RUN npm ci --only=production --omit=optional --no-audit --no-fund
 
 # Copy backend source
 COPY backend ./
+
+# Production stage - serve both frontend and backend
+FROM node:20-alpine AS production
+WORKDIR /app
+
+# Copy backend build
+COPY --from=backend-build /app ./
 
 # Copy frontend build to serve as static files
 COPY --from=frontend-build /app/frontend/build ./public
