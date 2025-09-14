@@ -58,6 +58,28 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'WiFi Billing API Server',
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      plans: '/api/plans',
+      payments: '/api/payments',
+      radius: '/api/radius',
+      mikrotik: '/api/mikrotik',
+      admin: '/api/admin',
+      portal: '/api/portal'
+    }
+  });
+});
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({ 
