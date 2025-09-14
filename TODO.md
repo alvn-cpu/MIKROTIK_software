@@ -5,9 +5,10 @@
 - [x] Build React frontend locally
 - [x] Update Dockerfile to build frontend during Docker build and include in backend image
 - [x] Backend server.js already configured to serve React frontend for routes like /admin
+- [x] Push changes to repository and redeploy on Railway
 
 ## Pending Tasks
-- [ ] Push changes to repository and redeploy on Railway
+- [ ] Redeploy on Railway to apply the Docker build fixes
 - [ ] Verify /admin route serves the React AdminDashboard page
 - [ ] Test other frontend routes (/, /login, /dashboard, etc.)
 - [ ] Confirm API endpoints under /api/* still work
