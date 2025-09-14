@@ -183,66 +183,39 @@ app.set('socketio', io);
 // Error handling middleware
 app.use('/api/*', errorHandler);
 
-// Catch-all handler: serve React app for non-API routes
+// Test route for debugging
+app.get('/admin', (req, res) => {
+  res.json({
+    message: 'Admin Dashboard Access Point',
+    status: 'Available',
+    timestamp: new Date().toISOString(),
+    frontend_available: frontendExists,
+    build_path: frontendBuildPath,
+    instructions: {
+      current_access: 'This is the admin dashboard endpoint',
+      api_access: 'Use /api/admin for admin API functionality',
+      user_management: '/api/users',
+      billing_plans: '/api/plans',
+      payments: '/api/payments',
+      system_management: '/api/mikrotik',
+      next_steps: 'The admin dashboard is accessible via API endpoints listed above'
+    }
+  });
+});
+
+// Simple catch-all for non-API routes
 app.get('*', (req, res) => {
-  try {
-    // Don't serve React app for API routes that aren't found
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ error: 'API route not found' });
-    }
-    
-    // Check if frontend is available
-    if (!frontendExists) {
-      return res.json({
-        message: 'WiFi Billing System - Frontend Not Available',
-        status: 'Backend Only Mode',
-        info: 'The React frontend build was not found. API endpoints are available.',
-        requested_path: req.path,
-        build_path_checked: frontendBuildPath,
-        timestamp: new Date().toISOString(),
-        available_endpoints: {
-          health: '/health',
-          api_documentation: '/api',
-          admin_api: '/api/admin',
-          authentication: '/api/auth',
-          users: '/api/users',
-          plans: '/api/plans',
-          payments: '/api/payments',
-          radius: '/api/radius',
-          mikrotik: '/api/mikrotik',
-          portal: '/api/portal'
-        },
-        instructions: {
-          admin_dashboard: 'The admin dashboard will be available once the React frontend is built and deployed.',
-          api_usage: 'You can interact with all API endpoints listed above.',
-          frontend_build: 'To enable the frontend, ensure the React build process completes successfully during deployment.'
-        }
-      });
-    }
-    
-    // Serve React app for all other routes
+  // Don't interfere with API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  
+  // Redirect to admin dashboard info for now
+  if (frontendExists) {
     const indexPath = path.join(frontendBuildPath, 'index.html');
-    res.sendFile(indexPath, (err) => {
-      if (err) {
-        console.error('Error serving React app:', err);
-        return res.status(500).json({ 
-          error: 'Failed to serve React application',
-          details: err.message,
-          indexPath: indexPath,
-          buildPath: frontendBuildPath,
-          requested_path: req.path,
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
-  } catch (error) {
-    console.error('Catch-all route error:', error);
-    return res.status(500).json({
-      error: 'Internal server error in catch-all route',
-      details: error.message,
-      requested_path: req.path,
-      timestamp: new Date().toISOString()
-    });
+    res.sendFile(indexPath);
+  } else {
+    res.redirect('/admin');
   }
 });
 
