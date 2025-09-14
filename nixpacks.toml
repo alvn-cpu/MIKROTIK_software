@@ -1,16 +1,24 @@
-# Nixpacks configuration for Railway deployment
+# Railway.com optimized Nixpacks configuration
+[phases.setup]
+cmds = ["echo 'Setting up Railway deployment for WiFi Billing System'"]
+
+[phases.install]
+cmds = [
+    "npm install --legacy-peer-deps --no-audit --no-fund",
+    "cd backend && npm install --only=production --no-audit --no-fund",
+    "cd frontend && npm install --legacy-peer-deps --no-audit --no-fund"
+]
+
 [phases.build]
 cmds = [
-    "npm ci --omit=optional --no-audit --no-fund || npm install --omit=optional --no-audit --no-fund",
-    "cd backend && npm ci --only=production --omit=optional --no-audit --no-fund || npm install --only=production --no-audit --no-fund", 
-    "cd frontend && npm ci --legacy-peer-deps --omit=optional --no-audit --no-fund || npm install --legacy-peer-deps --no-audit --no-fund",
     "cd frontend && npm run build",
     "mkdir -p backend/public",
-    "cp -r frontend/build/* backend/public/ || true"
+    "cp -r frontend/build/* backend/public/"
 ]
 
 [phases.start]
-cmd = "cd backend && node server.js"
+cmd = "cd backend && npm start"
 
 [variables]
 NODE_ENV = "production"
+PORT = "3000"
