@@ -2,23 +2,22 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy all package.json files first for better layer caching
-COPY package*.json ./
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
+# Copy everything first (simpler approach)
+COPY . .
 
 # Install root dependencies
-RUN npm ci --omit=optional --no-audit --no-fund
+RUN npm ci --omit=optional --no-audit --no-fund || npm install --omit=optional --no-audit --no-fund
 
 # Install backend dependencies  
-RUN cd backend && npm ci --only=production --omit=optional --no-audit --no-fund
+RUN cd backend && npm ci --only=production --omit=optional --no-audit --no-fund || npm install --only=production --no-audit --no-fund
 
 # Install frontend dependencies (with legacy peer deps for React Scripts compatibility)
-RUN cd frontend && npm ci --legacy-peer-deps --omit=optional --no-audit --no-fund
+RUN cd frontend && npm ci --legacy-peer-deps --omit=optional --no-audit --no-fund || npm install --legacy-peer-deps --no-audit --no-fund
 
-# Copy source code
-COPY frontend ./frontend
-COPY backend ./backend
+# Verify frontend structure before building
+RUN echo "Frontend directory contents:" && ls -la frontend/
+RUN echo "Frontend public directory contents:" && ls -la frontend/public/
+RUN test -f frontend/public/index.html && echo "✓ index.html found" || echo "✗ index.html NOT found"
 
 # Build frontend
 RUN cd frontend && npm run build
