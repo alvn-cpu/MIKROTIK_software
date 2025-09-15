@@ -17,10 +17,13 @@ RUN ls -la frontend/
 RUN echo "=== FRONTEND/PUBLIC DIR ==="
 RUN ls -la frontend/public/ || echo "PUBLIC DIR MISSING"
 
-# Install all dependencies after copying (forces rebuild)
+# Install dependencies with proper conflict resolution
 RUN npm install --legacy-peer-deps --no-audit --no-fund
 RUN cd backend && npm install --only=production --no-audit --no-fund  
-RUN cd frontend && npm install --legacy-peer-deps --no-audit --no-fund
+
+# Clean install frontend dependencies to resolve ajv conflicts
+RUN cd frontend && rm -rf node_modules package-lock.json
+RUN cd frontend && npm install --legacy-peer-deps --force --no-audit --no-fund
 
 # FORCE CREATE index.html if missing
 RUN mkdir -p frontend/public
