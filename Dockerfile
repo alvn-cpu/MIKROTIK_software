@@ -35,8 +35,11 @@ RUN ls -la frontend/public/
 RUN cat frontend/public/index.html
 RUN echo "✅ Index.html ready for build"
 
-# Build frontend with verbose output
+# Build frontend with verbose output and webpack fixes
 RUN echo "Starting React build..."
+ENV GENERATE_SOURCEMAP=false
+ENV CI=false
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN cd frontend && npm run build
 
 # Copy build to backend
