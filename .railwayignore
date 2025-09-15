@@ -1,7 +1,11 @@
-# Force Railway to ignore Docker files and use Nixpacks
-Dockerfile*
-docker-compose*
-.dockerignore
+# Prevent Railway from detecting frontend/backend as separate services
+# This forces Railway to treat this as a single monorepo deployment
+frontend/package.json
+backend/package.json
+
+# But still include the directories themselves
+!frontend/
+!backend/
 
 # Development files
 .git/

@@ -2,8 +2,12 @@
   "name": "wifi-billing-system",
   "version": "1.0.0",
   "_railway_cache_buster": "docker-fix-v3-20250915",
-  "description": "WiFi billing system with captive portal, RADIUS authentication, and mobile payment integration",
-  "main": "backend/server.js",
+  "description": "WiFi billing system with captive portal, RADIUS authentication, and mobile payment integration - Single Service Deployment",
+  "main": "start.js",
+  "engines": {
+    "node": "20.x",
+    "npm": ">=10.x"
+  },
   "scripts": {
     "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
     "start": "node start.js",

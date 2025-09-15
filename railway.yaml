@@ -1,0 +1,27 @@
+version: 2
+
+build:
+  builder: dockerfile
+  dockerfilePath: Dockerfile
+
+deploy:
+  startCommand: npm start
+  healthcheckPath: /health
+  healthcheckTimeout: 300
+  restartPolicyType: ON_FAILURE
+  restartPolicyMaxRetries: 10
+
+environments:
+  production:
+    variables:
+      NODE_ENV: production
+      PORT: ${{ PORT }}
+
+# Disable automatic service detection for subdirectories
+services:
+  app:
+    source: .
+    build:
+      builder: dockerfile
+    deploy:
+      startCommand: npm start
