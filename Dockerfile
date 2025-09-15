@@ -1,28 +1,39 @@
-# Railway-specific Dockerfile to fix index.html issue
+# CACHE BUSTER: Railway Dockerfile v3.0 - FORCE REBUILD
 FROM node:20-alpine
+
+# Add cache buster
+RUN echo "Building WiFi Billing System - Force Rebuild $(date)"
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
-
-# Install dependencies
-RUN npm install --legacy-peer-deps --no-audit --no-fund
-RUN cd backend && npm install --only=production --no-audit --no-fund
-RUN cd frontend && npm install --legacy-peer-deps --no-audit --no-fund
-
-# Copy all source files
+# Copy ALL files first (different approach to force cache clear)
 COPY . .
 
-# CRITICAL: Manually ensure index.html exists before building
+# Debug: Show what was copied
+RUN echo "=== FILES COPIED ==="
+RUN ls -la
+RUN echo "=== FRONTEND DIR ==="
 RUN ls -la frontend/
-RUN ls -la frontend/public/ || mkdir -p frontend/public
-RUN test -f frontend/public/index.html || echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>WiFi Billing</title></head><body><div id="root"></div></body></html>' > frontend/public/index.html
-RUN echo "✅ Index.html verification complete"
+RUN echo "=== FRONTEND/PUBLIC DIR ==="
+RUN ls -la frontend/public/ || echo "PUBLIC DIR MISSING"
 
-# Build frontend
+# Install all dependencies after copying (forces rebuild)
+RUN npm install --legacy-peer-deps --no-audit --no-fund
+RUN cd backend && npm install --only=production --no-audit --no-fund  
+RUN cd frontend && npm install --legacy-peer-deps --no-audit --no-fund
+
+# FORCE CREATE index.html if missing
+RUN mkdir -p frontend/public
+RUN if [ ! -f "frontend/public/index.html" ]; then echo "Creating index.html"; echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>WiFi Billing System</title></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>' > frontend/public/index.html; fi
+
+# Verify index.html exists
+RUN echo "=== FINAL VERIFICATION ==="
+RUN ls -la frontend/public/
+RUN cat frontend/public/index.html
+RUN echo "✅ Index.html ready for build"
+
+# Build frontend with verbose output
+RUN echo "Starting React build..."
 RUN cd frontend && npm run build
 
 # Copy build to backend
